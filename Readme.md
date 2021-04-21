@@ -3,6 +3,11 @@
 
 This is a simple Flashcards application written in Python. It uses the TKinter framework for the GUI. If you like my approach for taking notes you can use the program as-is and enjoy playing around / learn / study with the flashcards. Alternatively, you can study the code - either for the sake of adjjusting it to your needs or for just learning about Python/TKinter and about the code behind the program.
 
+# How to run / install
+
+You must install Python 3.7 or higher first. After cloning the repo to a local folder go the command line, cd into this folder and then run 'python main.py'. I tested the program on both Mac and Windows.
+
+
 # Background
 
 I used to write all my notes in OneNote. Recently however I changed my approach and I now write everything in simple markdown files, using Obsidian as my note-taking program. The reason I like markdown is that it's simple, text-based, fast and above all non-proprietary. 
