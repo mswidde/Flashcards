@@ -40,10 +40,10 @@ class flashcards:
             self.view = [
                 x
                 for x in self.view
-                if input in self.cards[x]["question"].lower()
-                or input in self.cards[x]["section"].lower()
-                or input in self.cards[x]["subsection"].lower()
-                or input in " ".join(self.cards[x]["answer"]).lower()
+                if input in self.cards[x]["Question"].lower()
+                or input in self.cards[x]["Topic"].lower()
+                or input in self.cards[x]["Section"].lower()
+                or input in " ".join(self.cards[x]["Answer"]).lower()
             ]
 
     # returns metadata skipped
@@ -65,7 +65,7 @@ class flashcards:
             return 0
 
     # increases metadata thup
-    def incThup(self, currentcard) -> bool:
+    def incThup(self, currentcard):
 
         # nothing to do if view is empty
         if self.view == []:
@@ -83,7 +83,7 @@ class flashcards:
             }
 
     # increases metadata thdn
-    def incThdn(self, currentcard) -> bool:
+    def incThdn(self, currentcard):
 
         # nothing to do if view is empty
         if self.view == []:
@@ -179,6 +179,26 @@ class flashcards:
     def totalSkipped(self) -> int:
         return len(self.skipped)
 
+    # returns total number of cards with thup >0
+    def totalwthup(self) -> int:
+
+        totthup = 0
+        for crd in self.cards:
+            if "metadata" in crd.keys() and crd["metadata"]["thup"] > 0:
+                totthup += 1
+
+        return totthup
+
+    # returns total number of cards with thup >0
+    def totalwthdn(self) -> int:
+
+        totthdn = 0
+        for crd in self.cards:
+            if "metadata" in crd.keys() and crd["metadata"]["thdn"] > 0:
+                totthdn += 1
+
+        return totthdn
+
     # load cards from a file
     def loadCards(self):
 
@@ -201,90 +221,66 @@ class flashcards:
 
         flashcards = []
 
-        # read file and parse text lines into cards
+        # read file into list of strings
         flashFile = open(common.ini["mdFile"], "r")
         inputText = flashFile.readlines()
 
-        # First find all the last answers by looking at where the text indentation goes back
-        current = 0
-        last_answers = []
-        for num, line in enumerate(inputText):
+        # first identify nature of each line: question, answer, section, topic
+        line_id = ["" for i in range(len(inputText))]
 
-            # skip empty lines
-            if line == "\n":
-                if current > 0:
-                    # mark last answer when level went down
-                    current = 0
-                    last_answers.append(num - 1)
+        prev_indent = 0
+        for line_index in range(len(inputText) - 1, -1, -1):
+
+            cleanline = inputText[line_index].strip()
+
+            # Topics
+            if cleanline.startswith("###"):
+                line_id[line_index] = "T"
                 continue
 
-            # skip sections
-            if len(line) > 4 and line[0:3] == "###":
-                if current > 0:
-                    # mark last answer when level went down
-                    current = 0
-                    last_answers.append(num - 1)
+            # Blank lines (or lines not starting with a - ), will be ignored later on
+            if cleanline == "" or cleanline[0] != "-":
+                line_id[line_index] = "B"
                 continue
 
-            # other lines must start with a '-' after some leading spaces or tabs
-            level = 0
-            for c in line:
-                if c == "-":
-                    last_dashline = num
-                    if current > level:
-                        # mark last answer when level went down
-                        current = 0
-                        last_answers.append(num - 1)
-                        break
-                    else:
-                        current = level
-                        break
-                elif c == " " or c == "\t":
-                    level = level + 1
+            # Q/A/S can be determined from indentation
+            curr_indent = len(inputText[line_index].split("-")[0])
+            if curr_indent >= prev_indent:
+                line_id[line_index] = "A"
+            elif line_id[line_index + 1] == "Q":
+                line_id[line_index] = "S"
+            else:
+                line_id[line_index] = "Q"
+                flashcards.append({})
 
-        # add last question (level did not go down because there was no next question)
-        last_answers.append(last_dashline)
+            prev_indent = curr_indent
 
-        # process last answers, make each into a flashcard
-        for la in last_answers:
+        # Now we can create the flashcards based on the line_id info
+        topic = section = ""
+        fc = -1
+        for num, id in enumerate(line_id):
 
-            answer = []
-            question = ""
-            subsection = ""
-            section = ""
+            if id == "B":
+                continue
 
-            # starting point
-            scan = la
-            level = len(inputText[scan].split("-")[0])
+            if id == "T":
+                topic = inputText[num].split("###")[1]
+                continue
 
-            # get lines with answer
-            while len(inputText[scan].split("-")[0]) == level:
-                answer.insert(0, inputText[scan].split("-", 1)[1])
-                scan = scan - 1
+            if id == "S":
+                section = inputText[num].split("-")[1]
+                continue
 
-            # next we must have arrived at the question
-            level = len(inputText[scan].split("-")[0])
-            question = inputText[scan].split("-")[1]
+            if id == "Q":
+                fc += 1
+                flashcards[fc]["Topic"] = topic
+                flashcards[fc]["Section"] = section
+                flashcards[fc]["Question"] = inputText[num].split("-", 1)[1]
+                flashcards[fc]["Answer"] = []
+                continue
 
-            # optional subsections
-            if level > 0:
-                # get line with subsection
-                while len(inputText[scan].split("-")[0]) > 0:
-                    scan = scan - 1
-                subsection = inputText[scan].split("-")[1]
-
-            # next we scan until we find the section
-            while scan >= 0:
-                if inputText[scan].startswith("###"):
-                    section = inputText[scan].split("###")[1]
-                scan = scan - 1
-
-            card = {
-                "section": section,
-                "subsection": subsection,
-                "question": question,
-                "answer": answer,
-            }
-            flashcards.append(card)
+            if id == "A":
+                flashcards[fc]["Answer"].append(inputText[num].split("-", 1)[1])
+                continue
 
         return flashcards

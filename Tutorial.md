@@ -1,0 +1,56 @@
+
+### Quick overview
+- Flashcards
+	- Main features
+		- Offers simple way to create/use/study using flashcards
+		- Study answers in peek mode or hide the answers (with an option to show them manually)
+		- Browse through the questions, or pick a random one
+		- Search for keywords to narrow down the list of questions to work with
+		- Mark questions for skipping them in the future
+		- Keep the score by marking questions with thumps up or thumps down
+		- Automatically saves results (thumps up/thumps down) and skipped questions
+		- Automatically saves program settings
+		- Program works on both mac and windows platforms (but for both it requires python 3.7 to be installed)
+		- A few example markdown files are included (like this tutorial)
+	- How to use the program?
+		- Open a .md file that has the correct lay-out for flashcards
+		- Study the contents in peek mode
+		- After some time, turn peek mode off and bring up random questions
+		- Verify the answer with the Show Answer button
+		- Optionally keep the score with thumps up (your anwer was correct) or thumps down (your answer was not correct)
+		- You can quit without losing the results, these are automatically preserved in a file
+- Markdown file
+	- Basic structure
+		- Blank lines are ignored
+		- The ### sign indicated the next Topic
+		- Below that you have 3 levels of indentation
+		- \* ○ 1st level is the section
+		- \* ○ 2nd level is the question
+		- \* ○ 3rd level is the answer
+		- 
+		- If some q&a is not displayed correctly, it's usally that the indentation formatting is wrong somehow
+	- About the section level
+		- This part is optional
+		- If you leave this out, the section will appear as empty and only 2 levels of indentation should remain
+	- About the quesions
+		- Should be a single line
+	- About the answers
+		- Can be multi-line, all parts of the answer should be on the same level of indentation
+		- \* ○ Note that the path can be absolute or relative to the main.py program
+		- \* ○ You should use a single line for the image, additional text can be added but should be on different lines
+		- 
+		- By default the answer is shown as a bullet list
+		- \* You can use \* at the beginning of a line (after the dash+space) if you don't want to display these bullets
+		- \* ○ You can still add different kinds of bullets to use your own, like is done in this line
+		-  You can also simply use an additional space to indent the default bullets, like is done in this line
+- Showing pictures
+	- Basics about showing pictures
+		- Only answers can include lines with a picture
+		- It's also possible to show multiple pictures, each one must be on a different line
+		- A scrollbar is automatically provided when necessary
+		- To display a picture use the format (image)[some/path/to/the/file]
+		- The path can either be absolute or relative to the main.py program
+		- Always use the .png format
+	- Example
+		- Here's an example of an answer that shows a picture
+		- (image)[ScreenShotTut.png]

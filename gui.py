@@ -2,15 +2,9 @@
 #   This file contains the Tkinter based GUI
 #
 
-import glob
 import os
-import subprocess
-from pathlib import Path
-import unicodedata
-import string
-from subprocess import PIPE, run
 import tkinter as tk
-from tkinter import ttk, filedialog, messagebox
+from tkinter import ttk, messagebox, PhotoImage, filedialog
 import data
 import common
 import random
@@ -23,36 +17,28 @@ class TkinterGui:
 
         # variables
         self.master = master
-        master.title("Flashcards")
+        master.title("Flashcards v1.1")
         self.currentcard = 0
 
         self.tk_autonext = tk.BooleanVar()
         self.tk_autonext.set(False)
+        self.tk_peek = tk.BooleanVar()
+        self.tk_peek.set(False)
 
         # get screen width and height
         screen_width = master.winfo_screenwidth()
         screen_height = master.winfo_screenheight()
 
-        # calculate position x and y coordinates
-        width = 780
-        height = 620
-        x = (screen_width / 2) - (width / 2)
-        y = (screen_height / 3) - (height / 2)
-        # master.geometry("%dx%d+%d+%d" % (width, height, x, y))
-        # master.geometry("")
-
         # main rows/columns
-        master.columnconfigure(0, weight=1)
-        master.columnconfigure(1, weight=1)
+        master.columnconfigure(0, weight=1, minsize=200)
+        master.columnconfigure(1, weight=1, minsize=200)
+        master.rowconfigure(0, minsize=400, weight=16)
+        master.rowconfigure(1, minsize=40, weight=1)
+        master.rowconfigure(2, minsize=160, weight=4)
 
         # setup frames
         self.frame_qa = tk.LabelFrame(
-            master,
-            borderwidth=4,
-            relief="groove",
-            text=" Questions & Answers ",
-            width=width,
-            height=height / 2,
+            master, borderwidth=4, relief="groove", text=" Questions & Answers "
         )
         self.frame_qa.grid(
             padx=10,
@@ -68,20 +54,26 @@ class TkinterGui:
             borderwidth=4,
             relief="groove",
             text="",
-            width=width - 20,
-            height=height / 2,
         )
         self.frame_btns.grid(
-            padx=10, pady=5, row=1, column=0, columnspan=2, sticky="nsew"
+            padx=10, pady=25, row=1, column=0, columnspan=2, sticky="nsew"
         )
+        self.frame_btns.columnconfigure(0, weight=1)
+        self.frame_btns.columnconfigure(1, weight=1)
+        self.frame_btns.columnconfigure(2, weight=1)
+        self.frame_btns.columnconfigure(3, weight=1)
+        self.frame_btns.columnconfigure(4, weight=1)
+        self.frame_btns.columnconfigure(5, weight=1)
+        self.frame_btns.columnconfigure(6, weight=1)
+        self.frame_btns.columnconfigure(7, weight=1)
+        self.frame_btns.columnconfigure(8, weight=1)
+        self.frame_btns.columnconfigure(9, weight=1)
 
         self.frame_stats = tk.LabelFrame(
             master,
             borderwidth=4,
             relief="groove",
             text=" Statistics ",
-            width=width / 2,
-            height=height / 2,
         )
         self.frame_stats.grid(padx=10, pady=10, row=2, column=0, sticky="nsew")
 
@@ -90,8 +82,6 @@ class TkinterGui:
             borderwidth=4,
             relief="groove",
             text=" Options ",
-            width=(width / 2) - 20,
-            height=height / 2,
         )
         self.frame_options.grid(padx=10, pady=10, row=2, column=1, sticky="nsew")
 
@@ -99,11 +89,11 @@ class TkinterGui:
         lbl_hide_qa0 = tk.Label(self.frame_qa, text=" ", width=8, font=("Helvetica", 4))
         lbl_hide_qa0.grid(sticky="ew", row=0)
 
-        lbl_section = tk.Label(self.frame_qa, text="Section")
-        lbl_section.grid(row=1, column=0, sticky="nw", padx=5, pady=5)
+        lbl_topic = tk.Label(self.frame_qa, text="Topic")
+        lbl_topic.grid(row=1, column=0, sticky="nw", padx=5, pady=5)
 
-        lbl_subsection = tk.Label(self.frame_qa, text="Subject")
-        lbl_subsection.grid(row=2, column=0, sticky="nw", padx=5, pady=5)
+        lbl_section = tk.Label(self.frame_qa, text="Subject")
+        lbl_section.grid(row=2, column=0, sticky="nw", padx=5, pady=5)
 
         lbl_question = tk.Label(self.frame_qa, text="Question")
         lbl_question.grid(row=3, sticky="nw", padx=5, pady=5)
@@ -114,27 +104,27 @@ class TkinterGui:
         lbl_hide_qa1 = tk.Label(self.frame_qa, text=" ", width=8, font=("Helvetica", 4))
         lbl_hide_qa1.grid(sticky="ew", row=8)
 
-        self.txt_section = tk.Text(
-            self.frame_qa, height=1, bg="lemon chiffon", width=120
-        )
-        self.txt_section.grid(row=1, column=1, sticky="nw", padx=5, pady=5)
+        self.txt_topic = tk.Text(self.frame_qa, height=1, bg="lemon chiffon", width=160)
+        self.txt_topic.grid(row=1, column=1, sticky="nw", padx=5, pady=5)
 
-        self.txt_subsection = tk.Text(
-            self.frame_qa, height=1, bg="lemon chiffon", width=120
+        self.txt_section = tk.Text(
+            self.frame_qa, height=1, bg="lemon chiffon", width=160
         )
-        self.txt_subsection.grid(
+        self.txt_section.grid(
             row=2, column=1, sticky="nw", padx=5, pady=5, columnspan=8
         )
 
         self.txt_question = tk.Text(
-            self.frame_qa, height=1, bg="lemon chiffon", width=120
+            self.frame_qa, height=1, bg="lemon chiffon", width=160
         )
         self.txt_question.grid(
             row=3, column=1, sticky="nw", padx=5, pady=5, columnspan=8
         )
 
+        ch = common.ini["height"]
+        cw = common.ini["width"]
         self.txt_answer = tk.Text(
-            self.frame_qa, height=12, bg="lemon chiffon", width=120
+            self.frame_qa, height=ch, bg="lemon chiffon", width=cw, wrap=tk.WORD
         )
         self.txt_answer.grid(row=4, column=1, sticky="nw", padx=5, pady=5, columnspan=8)
 
@@ -232,7 +222,7 @@ class TkinterGui:
         self.display_cb.grid(row=6, column=1, sticky="w", padx=5, pady=5)
         self.display_cb.bind("<<ComboboxSelected>>", self.callback_display)
 
-        self.autonext_ckb = ttk.Checkbutton(
+        self.autonext_ckb = tk.Checkbutton(
             self.frame_options,
             text="Auto-Next on \U0001f44D \U0001f44E",
             onvalue=1,
@@ -242,42 +232,53 @@ class TkinterGui:
         )
         self.autonext_ckb.grid(row=6, column=2, sticky="w", padx=5, pady=1)
 
-        # button section
-        lbl_hide_butt1 = tk.Label(self.frame_btns, text=" ", width=18)
-        lbl_hide_butt1.grid(sticky="nw", row=0, column=3)
-
-        lbl_hide_butt2 = tk.Label(self.frame_btns, text=" ", width=24)
-        lbl_hide_butt2.grid(sticky="nw", row=0, column=8)
+        self.peek_ckb = tk.Checkbutton(
+            self.frame_btns,
+            text="Peekmode",
+            onvalue=1,
+            offvalue=0,
+            variable=self.tk_peek,
+            command=self.callback_peek,
+        )
+        self.peek_ckb.grid(row=0, column=8, pady=5, sticky="nse")
 
         lbl_display = tk.Label(self.frame_options, text="Search     ")
         lbl_display.grid(row=7, sticky="sw", padx=5, pady=1)
 
-        self.prev_button = tk.Button(self.frame_btns, text="<<", command=self.previous)
-        self.prev_button.grid(row=0, column=0, sticky="nw", pady=5)
+        # button section
 
-        self.next_button = tk.Button(self.frame_btns, text=">>", command=self.next)
-        self.next_button.grid(row=0, column=1, sticky="nw", pady=5)
+        # create frames to group some buttons and allow to keep them together
+        self.f1 = tk.Frame(self.frame_btns)
+        self.f2 = tk.Frame(self.frame_btns)
+        self.f1.grid(row=0, column=1, sticky="nsw", pady=5)
+        self.f2.grid(row=0, column=4, sticky="nsw", pady=5)
 
-        self.rnd_button = tk.Button(self.frame_btns, text="Random", command=self.random)
-        self.rnd_button.grid(row=0, column=2, sticky="nw", pady=5)
+        self.prev_button = tk.Button(self.f1, text="<<", command=self.previous)
+        self.prev_button.pack(side=tk.LEFT)
+
+        self.next_button = tk.Button(self.f1, text=">>", command=self.next)
+        self.next_button.pack(side=tk.LEFT)
+
+        self.rnd_button = tk.Button(self.f1, text="Random", command=self.random)
+        self.rnd_button.pack(side=tk.LEFT)
 
         self.show_answer_button = tk.Button(
-            self.frame_btns, text="Show Answer", command=self.show_answer
+            self.f2, text="Show Answer", command=self.show_answer
         )
-        self.show_answer_button.grid(row=0, column=4, sticky="nw", pady=5)
+        self.show_answer_button.pack(side=tk.LEFT)
 
-        self.skip_button = tk.Button(self.frame_btns, text="Skip", width=6)
-        self.skip_button.grid(row=0, column=5, pady=5, sticky="nw")
+        self.skip_button = tk.Button(self.f2, text="Skip", width=6, command=self.skip)
+        self.skip_button.pack(side=tk.LEFT)
 
         self.thup_button = tk.Button(
-            self.frame_btns, text="\U0001f44D", width=5, command=self.thup
+            self.f2, text="\U0001f44D", width=5, command=self.thup
         )
-        self.thup_button.grid(row=0, column=6, pady=5, sticky="nw")
+        self.thup_button.pack(side=tk.LEFT)
 
         self.thdn_button = tk.Button(
-            self.frame_btns, text="\U0001f44E", width=5, command=self.thdn
+            self.f2, text="\U0001f44E", width=5, command=self.thdn
         )
-        self.thdn_button.grid(row=0, column=7, pady=5, sticky="nw")
+        self.thdn_button.pack(side=tk.LEFT)
 
         self.txt_search = tk.Entry(
             self.frame_options,
@@ -286,9 +287,28 @@ class TkinterGui:
             relief="groove",
         )
         self.txt_search.grid(row=7, column=1, sticky="w", padx=5, pady=1, columnspan=3)
-        self.txt_search.bind("<Return>", self.callback_search)
-        self.txt_search.bind("<FocusIn>", self.callback_sfocus)
-        self.bindkeys()
+
+        # setup scrollbar - must use ttk.style for setting the colors
+        style = ttk.Style()
+        style.theme_use("clam")
+        style.configure(
+            "Vertical.TScrollbar",
+            gripcount=0,
+            background="lemon chiffon",
+            darkcolor="DarkGreen",
+            lightcolor="LightGreen",
+            troughcolor="gray",
+            bordercolor="blue",
+            arrowcolor="white",
+        )
+
+        self.scrollbar = self.AutoScrollbar(
+            self.frame_qa,
+            orient="vertical",
+            command=self.txt_answer.yview,
+        )
+        self.scrollbar.grid(row=4, column=9, sticky="nse")
+        self.txt_answer["yscrollcommand"] = self.scrollbar.set
 
         # hide screen by using transparancy mode, center it, then bring it back
         # note: this is a workaround - I found that using withdraw and deiconify didn't work properly on a mac
@@ -297,12 +317,81 @@ class TkinterGui:
         width = master.winfo_width()
         height = master.winfo_height()
         x = (screen_width / 2) - (width / 2)
-        y = (screen_height / 3) - (height / 2)
+        y = (screen_height / 2) - (height / 2)
         master.geometry("%dx%d+%d+%d" % (width, height, x, y))
         master.attributes("-alpha", 1)
+        master.minsize(1200, 710)
+
+        # configure bindings
+        self.frame_qa.bind(
+            "<Configure>",
+            self.rescale,
+        )
+        self.txt_answer.bind("<MouseWheel>", self.scrollwheel)
+        self.txt_search.bind("<Return>", self.callback_search)
+        self.txt_search.bind("<FocusIn>", self.callback_sfocus)
+        self.bindkeys()
 
         # start showing the 1st card
+        self.rescale(0)
         self.show_card()
+
+    # subclass scrollbar for auto-hide effect
+    class AutoScrollbar(ttk.Scrollbar):
+        def set(self, low, high):
+
+            if float(low) <= 0.0 and float(high) >= 1.0:
+                # Using grid_remove
+                self.tk.call("grid", "remove", self)
+            else:
+                self.grid()
+
+            ttk.Scrollbar.set(self, low, high)
+
+    def callback_peek(self):
+
+        if self.tk_peek.get() == True:
+            common.ini["peekmode"] = "True"
+        else:
+            common.ini["peekmode"] = "False"
+        common.save_ini()
+        self.show_card()
+
+    def scrollwheel(self, event):
+        return "break"
+
+    def rescale(self, event):
+
+        # calculate pixels per character for width
+        a = self.txt_answer.winfo_width()
+        b = self.txt_answer["width"]
+        common.ini["width"] = b
+        ppc = a // b
+
+        # calculate how many chars fit in frame
+        d = self.frame_qa.winfo_width()
+        char_in_frame = d // ppc
+
+        self.txt_answer["width"] = char_in_frame - 20
+        self.txt_topic["width"] = char_in_frame - 20
+        self.txt_question["width"] = char_in_frame - 20
+        self.txt_section["width"] = char_in_frame - 20
+
+        # calculate pixels per character for height
+        a = self.txt_answer.winfo_height()
+        b = self.txt_answer["height"]
+        common.ini["height"] = b
+        ppc = a // b
+
+        # update ini
+        common.save_ini()
+
+        # calculate how many chars fit in frame
+        d = self.frame_qa.winfo_height()
+        char_in_frame = d // ppc
+        self.txt_answer["height"] = char_in_frame - 12
+
+        return
 
     def skip(self):
         if common.myFlashcards.getCard(self.currentcard) == {}:
@@ -455,13 +544,54 @@ class TkinterGui:
         self.show_card()
 
     def show_answer(self):
+
+        global my_image
+        my_image = []
+        image_counter = 0
+
         self.fields_to_normal()
         card = common.myFlashcards.getCard(self.currentcard)
 
         if card != {}:
             self.txt_answer.delete("1.0", "end")
-            for line in card["answer"]:
-                self.txt_answer.insert(tk.END, " \u2022 " + line)
+            self.txt_answer.insert(tk.END, "\n\n")
+            for line in card["Answer"]:
+                if line.strip().startswith("(image)["):
+                    self.txt_answer.insert(tk.END, "\n\t")
+
+                    org_filepath = line.strip()[:-1].split("[")[1]
+
+                    if not os.path.exists(org_filepath):
+                        dir_path = os.path.dirname(os.path.realpath(__file__))
+                        org_filepath = dir_path + "/" + org_filepath
+
+                    try:
+                        my_image.append(PhotoImage(file=org_filepath))
+                        self.txt_answer.image_create(
+                            tk.INSERT, image=my_image[image_counter]
+                        )
+
+                        self.txt_answer.insert(tk.END, "\n\n")
+                        image_counter += 1
+
+                    except Exception as err:
+                        print(f"Some issues with file {org_filepath}....")
+                        print(err)
+
+                else:
+                    if line.strip() == "":
+                        pline = line
+                    else:
+                        # insert bullet itself if not opted out for with \*
+                        if not line.startswith(" \*"):
+                            # insert spaces before the bullet sign if applicable
+                            pline = " " * (len(line) - len(line.lstrip()))
+                            pline += " \u2022 " + line.lstrip()
+                        else:
+                            pline = " " * (len(line) - len(line[3:].lstrip()))
+                            pline += line[3:].lstrip()
+
+                    self.txt_answer.insert(tk.END, pline)
 
         self.fields_to_disabled()
 
@@ -469,8 +599,8 @@ class TkinterGui:
         self.show_answer()
 
     def fields_to_normal(self):
+        self.txt_topic.configure(state="normal")
         self.txt_section.configure(state="normal")
-        self.txt_subsection.configure(state="normal")
         self.txt_question.configure(state="normal")
         self.txt_answer.configure(state="normal")
         self.txt_file.configure(state="normal")
@@ -481,8 +611,8 @@ class TkinterGui:
         self.txt_currq.configure(state="normal")
 
     def fields_to_disabled(self):
+        self.txt_topic.configure(state="disabled")
         self.txt_section.configure(state="disabled")
-        self.txt_subsection.configure(state="disabled")
         self.txt_question.configure(state="disabled")
         self.txt_answer.configure(state="disabled")
         self.txt_file.configure(state="disabled")
@@ -498,8 +628,8 @@ class TkinterGui:
         self.fields_to_normal()
 
         # delete current data
+        self.txt_topic.delete("1.0", "end")
         self.txt_section.delete("1.0", "end")
-        self.txt_subsection.delete("1.0", "end")
         self.txt_question.delete("1.0", "end")
         self.txt_answer.delete("1.0", "end")
         self.txt_skipped.delete("1.0", "end")
@@ -507,10 +637,30 @@ class TkinterGui:
         self.txt_search.delete(0, "end")
         self.txt_file.delete("1.0", "end")
         self.txt_totq.delete("1.0", "end")
+        self.txt_thup.delete("1.0", "end")
+        self.txt_thdn.delete("1.0", "end")
+
+        # set autonext to correct value
+        if common.ini["autonext"] == "True":
+            self.tk_autonext.set(True)
+        else:
+            self.tk_autonext.set(False)
+
+        # set display mode to correct value
+        self.display_cb.current(self.display_cb["values"].index(common.ini["display"]))
+
+        # set search field to saved value
+        self.txt_search.insert(0, common.ini["search"])
+
+        # set peekmode to saved value
+        if common.ini["peekmode"] == "True":
+            self.tk_peek.set(True)
+        else:
+            self.tk_peek.set(False)
 
         # handle cases with no valid cards
         if common.myFlashcards.totalCards() == 0:
-            self.txt_section.insert(
+            self.txt_topic.insert(
                 tk.END,
                 " No cards in file (try loading a different .md file) ",
             )
@@ -518,8 +668,7 @@ class TkinterGui:
             return
 
         if common.myFlashcards.totalView() == 0:
-            self.txt_search.insert(0, common.ini["search"])
-            self.txt_section.insert(
+            self.txt_topic.insert(
                 tk.END,
                 " No cards in selection (try showing all cards or search for a different string) ",
             )
@@ -531,33 +680,20 @@ class TkinterGui:
 
         # update skip button
         if common.myFlashcards.getTagSkipped(self.currentcard):
-            self.skip_button = tk.Button(
-                self.frame_btns, text="UnSkip", width=6, command=self.skip
-            )
-            self.skip_button.grid(row=0, column=5, pady=5, sticky="nw")
+            self.skip_button.config(text="Unskip")
         else:
-            self.skip_button = tk.Button(
-                self.frame_btns, text=" Skip ", width=6, command=self.skip
-            )
-            self.skip_button.grid(row=0, column=5, pady=5, sticky="nw")
+            self.skip_button.config(text=" Skip ")
 
         # update thup/thdn buttons
         thupnr = common.myFlashcards.getThup(self.currentcard)
-        self.thup_button = tk.Button(
-            self.frame_btns, text=f"\U0001f44D : {thupnr}", width=5, command=self.thup
-        )
-        self.thup_button.grid(row=0, column=6, pady=5, sticky="nw")
-
+        self.thup_button.config(text=f"\U0001f44D : {thupnr}")
         thdnnr = common.myFlashcards.getThdn(self.currentcard)
-        self.thdn_button = tk.Button(
-            self.frame_btns, text=f"\U0001f44E : {thdnnr}", width=5, command=self.thdn
-        )
-        self.thdn_button.grid(row=0, column=7, pady=5, sticky="nw")
+        self.thdn_button.config(text=f"\U0001f44E : {thdnnr}")
 
         # put card in subsequent textboxes (do not show answer yet)
-        self.txt_section.insert(tk.END, card["section"])
-        self.txt_subsection.insert(tk.END, card["subsection"])
-        self.txt_question.insert(tk.END, card["question"].split("(fltags:")[0])
+        self.txt_topic.insert(tk.END, card["Topic"])
+        self.txt_section.insert(tk.END, card["Section"])
+        self.txt_question.insert(tk.END, card["Question"].split("(fltags:")[0])
 
         # filename
         fn = common.ini["mdFile"]
@@ -574,13 +710,16 @@ class TkinterGui:
         )
 
         self.txt_skipped.insert(tk.END, common.myFlashcards.totalSkipped())
+        self.txt_thup.insert(tk.END, common.myFlashcards.totalwthup())
+        self.txt_thdn.insert(tk.END, common.myFlashcards.totalwthdn())
 
         self.txt_currq.insert(
             tk.END,
             str(self.currentcard + 1) + "/" + str(common.myFlashcards.totalView()),
         )
 
-        # search field
-        self.txt_search.insert(0, common.ini["search"])
+        # also show answer when in peek mode
+        if self.tk_peek.get() == True:
+            self.show_answer()
 
         self.fields_to_disabled()

@@ -39,7 +39,15 @@ def load_ini():
 
         # json not available / not properly formatted
         # setup a new default ini file
-        ini = {"mdFile": "", "display": "non-skipped", "autonext": "True", "search": ""}
+        ini = {
+            "mdFile": "",
+            "display": "Non-Skipped",
+            "autonext": "True",
+            "search": "",
+            "peekmode": "True",
+            "width": "160",
+            "height": "22",
+        }
         save_ini()
 
 
@@ -141,10 +149,10 @@ def merge_cache():
         for index in range(start, len(myFlashcards.cards)):
 
             if (
-                myFlashcards.cards[index]["question"] == crd_old["question"]
-                and myFlashcards.cards[index]["answer"] == crd_old["answer"]
-                and myFlashcards.cards[index]["section"] == crd_old["section"]
-                and myFlashcards.cards[index]["subsection"] == crd_old["subsection"]
+                myFlashcards.cards[index]["Question"] == crd_old["Question"]
+                and myFlashcards.cards[index]["Answer"] == crd_old["Answer"]
+                and myFlashcards.cards[index]["Topic"] == crd_old["Topic"]
+                and myFlashcards.cards[index]["Section"] == crd_old["Section"]
             ):
 
                 myFlashcards.cards[index]["metadata"] = crd_old["metadata"]
@@ -154,10 +162,10 @@ def merge_cache():
         # if not found yet, continue and complete the search from 0
         for index in range(0, start):
             if (
-                myFlashcards.cards[index]["question"] == crd_old["question"]
-                and myFlashcards.cards[index]["answer"] == crd_old["answer"]
-                and myFlashcards.cards[index]["section"] == crd_old["section"]
-                and myFlashcards.cards[index]["subsection"] == crd_old["subsection"]
+                myFlashcards.cards[index]["Question"] == crd_old["Question"]
+                and myFlashcards.cards[index]["Answer"] == crd_old["Answer"]
+                and myFlashcards.cards[index]["Topic"] == crd_old["Topic"]
+                and myFlashcards.cards[index]["Section"] == crd_old["Section"]
             ):
 
                 myFlashcards.cards[index]["metadata"] = crd_old["metadata"]
