@@ -54,8 +54,19 @@ I included a small example markdown file you can play with.
 # Screenshots
 
 Question, answer hidden 
-![Screenshot1](./ScreenShot1.png?raw=true "Without answer")
+![Screenshot1](./ScreenShot1.png?raw=true "Answer is hidden")
 
 Question, answer shown
-![Screenshot1](./ScreenShot2.png?raw=true "With the answer")
+![Screenshot2](./ScreenShot2.png?raw=true "Answer shown")
 
+Question, answer shown that includes a picture
+![Screenshot3](./ScreenShot3.png?raw=true "Answer containing an image")
+
+# Updates
+ 
+ New version 1.1
+ - Includes option for using image files (.png) in an answer
+ - Peekmode to continuously have the answer shown immediately
+ - When you resize the screen the new setting will be stored automatically
+ - Includes a tutorial.md
+ - Bugfixes

@@ -23,4 +23,6 @@
 	- What's up with the Dark Side of the Moon?
 		- First off this is a brilliant Pink Floyd album ;-
 		- Second: there is no dark side - only a side that we can never see from Earth
-
+	- Want to see an awesome picture of the far side of the moon?
+		- 
+		- (image)[images/moon-far.png]
